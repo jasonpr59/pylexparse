@@ -2,10 +2,10 @@ class Pattern(object):
     """Base class for all patterns, besides strings"""
 
 class Sequence(object):
-    """The concatenation of two or more patterns."""
+    """The concatenation of one or more patterns."""
 
-    def __init__(self, first, second, *rest):
-        self.patterns = [first, second] + list(rest)
+    def __init__(self, first, *rest):
+        self.patterns = [first] + list(rest)
 
     def __repr__(self):
         return ''.join('(%s)' % pattern for pattern in self.patterns)
@@ -22,10 +22,10 @@ class Star(object):
 
 
 class Or(object):
-    """Exactly one pattern from two or more candidates."""
+    """Exactly one pattern from one or more candidates."""
 
-    def __init__(self, first, second, *rest):
-        self.patterns = [first, second] + list(rest)
+    def __init__(self, first, *rest):
+        self.patterns = [first] + list(rest)
 
     def __repr__(self):
         return '|'.join('(%s)' % pattern for pattern in self.patterns)
