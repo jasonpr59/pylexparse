@@ -65,7 +65,7 @@ class Fragment(object):
         # TODO(jasonpr): Consider somehow ruining follower, so nobody
         # attempts to use the old, unusable fragment.
 
-    def add_in_parallel(self, sibling, *more_siblings):
+    def add_in_parallel(self, *siblings):
         """Connect an NFA fragment in parallel with this one.
 
         See 'append' for a warning against using any sibling once it has
@@ -73,7 +73,7 @@ class Fragment(object):
         """
         new_start, new_end = State(), State()
 
-        parts = [self, sibling] + list(more_siblings)
+        parts = [self] + list(siblings)
 
         for part in parts:
             new_start.add_empty_transition(part.start)
