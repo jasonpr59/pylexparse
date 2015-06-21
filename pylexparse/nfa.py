@@ -112,3 +112,19 @@ class Nfa(object):
     @classmethod
     def from_fragment(cls, fragment):
         return cls(fragment.start, [fragment.end])
+
+
+def epsilon_closure(states):
+    agenda = collections.deque(states)
+    closure = set()
+
+    while agenda:
+        state = agenda.pop()
+        if state in closure:
+            # We've already visited it!
+            continue
+        closure.add(state)
+
+        agenda.extend(state.follow(''))
+
+    return closure
