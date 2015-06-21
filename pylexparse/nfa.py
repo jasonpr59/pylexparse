@@ -106,12 +106,31 @@ class Nfa(object):
 
     def __init__(self, start, accepting_states):
         self.start = start
-        self.accepting = accepting_states
-
+        self.accepting = set(accepting_states)
 
     @classmethod
     def from_fragment(cls, fragment):
         return cls(fragment.start, [fragment.end])
+
+    def match(self, candidate):
+        """Match the candidate against this NFA.
+
+        Return whether the candidate matches.
+        """
+
+        states = set(epsilon_closure([self.start]))
+
+        # Determine what states can be reached after consuming each
+        # character.
+        for character in candidate:
+            next_states = set()
+            for state in states:
+                next_states |= state.follow(character)
+            states = next_states
+            states = epsilon_closure(states)
+
+        # See if any reachable state is an accpeting state.
+        return bool(states & self.accepting)
 
 
 def epsilon_closure(states):
