@@ -38,6 +38,10 @@ class State(object):
         for unused_character, destination in self:
             yield destination
 
+    def follow(self, character):
+        return self._transitions[character]
+
+
 class Fragment(object):
     """A piece of an NFA graph with a single start and single end.
 
