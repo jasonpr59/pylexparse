@@ -72,8 +72,10 @@ def anything_to_fragment(pat):
 
 @handles(pattern.OneOf)
 def one_of_to_fragment(one_of):
-    equivalent_pattern = pattern.Or(*(char for char in one_of.candidates))
-    return pattern_to_fragment(equivalent_pattern)
+    start, end = nfa.State(), nfa.State()
+    for char in one_of.candidates:
+        start.add_transition(char, end)
+    return nfa.Fragment(start, end)
 
 
 @handles(pattern.Repeat)
