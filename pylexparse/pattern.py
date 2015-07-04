@@ -56,14 +56,15 @@ class Anything(object):
         return '.'
 
 
-class OneOf(object):
+class Selection(object):
     """Matches any single character from a string of candidates."""
 
-    def __init__(self, candidates):
+    def __init__(self, candidates, negating=False):
         self.candidates = candidates
+        self.negating = negating
 
     def __repr__(self):
-        return '[%s]' % self.candidates
+        return '[%s%s]' % ('^' if self.negating else '', self.candidates)
 
 
 class Repeat(object):

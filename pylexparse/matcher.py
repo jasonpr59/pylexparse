@@ -6,6 +6,8 @@ import nfa
 import pattern
 
 
+# TODO(jasonpr): Check that string.printable is what we want.
+_ALL_CHARS = set(string.printable)
 
 # NFA fragment producers will be registered into this dict.
 fragment_producers = {}
@@ -73,14 +75,16 @@ def maybe_to_fragment(maybe):
 
 @handles(pattern.Anything)
 def anything_to_fragment(pat):
-    # TODO(jasonpr): Check that string.printable is what we want.
-    return pattern_to_fragment(pattern.OneOf(string.printable))
+    return pattern_to_fragment(pattern.Selection(_ALL_CHARS))
 
 
-@handles(pattern.OneOf)
-def one_of_to_fragment(one_of):
+@handles(pattern.Selection)
+def selection_to_fragment(selection):
     start, end = nfa.State(), nfa.State()
-    for char in one_of.candidates:
+    candidates = set(selection.candidates)
+    if selection.negating:
+        candidates = _ALL_CHARS - candidates
+    for char in candidates:
         start.add_transition(char, end)
     return nfa.Fragment(start, end)
 
@@ -104,7 +108,7 @@ def range_to_fragment(range_pat):
     low_index = ord(range_pat.low_character)
     high_index = ord(range_pat.high_character)
     chars = ''.join(chr(index) for index in range(low_index, high_index + 1))
-    return pattern_to_fragment(pattern.OneOf(chars))
+    return pattern_to_fragment(pattern.Selection(chars))
 
 
 def pattern_to_fragment(pat):

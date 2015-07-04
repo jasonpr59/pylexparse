@@ -150,8 +150,14 @@ def _parse_group(source):
     """
     first_char = source.get()
     if first_char == '[':
+        second_char = source.get()
+        if second_char == '^':
+            negating = True
+        else:
+            source.put(second_char)
+            negating = False
         group_chars = _parse_group_chars(source)
-        result = p.OneOf(group_chars)
+        result = p.Selection(group_chars, negating)
         close_brace = source.get()
         assert close_brace == ']'
         return result
@@ -197,7 +203,7 @@ def _parse_atom(source):
         if escaped in _IDENTIY_ESCAPES:
             return escaped
         elif escaped in _CHARACTER_CLASSES:
-            return p.OneOf(_CHARACTER_CLASSES[escaped])
+            return p.Selection(_CHARACTER_CLASSES[escaped])
         else:
             raise ValueError('Unexpected escape sequence, \\%s.', escaped)
     else:
