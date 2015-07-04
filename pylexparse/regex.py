@@ -6,7 +6,7 @@ import string
 import pattern as p
 
 # Characters that represent themselves in a regular expression.
-_CHAR_LITERALS = string.ascii_letters + string.digits + '!"#%&\',-/:;<=>@_`~'
+_CHAR_LITERALS = string.ascii_letters + string.digits + '!"#%&\',-/:;<=>@_`~ \t'
 # Characters that represent themselves inside a square-bracket expression.
 _GROUP_CHARS = string.ascii_letters + string.digits + '!"#$%&\'()*+,./:;<=>?@[^_`{|}~'
 
