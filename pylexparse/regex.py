@@ -10,6 +10,9 @@ import pattern as p
 _CHAR_LITERALS = string.ascii_letters + string.digits + '!"#$%&\',-/:;<=>@^_`~ \t'
 # Characters that represent themselves inside a square-bracket expression.
 _GROUP_CHARS = string.ascii_letters + string.digits + '!"#$%&\'()*+,./:;<=>?@[^_`{|}~'
+# Characters that represent themselves when escaped with a backslash.
+_IDENTIY_ESCAPES = r'.[\()*+?{|'
+
 
 class _CharSource(object):
     """An input source with getc() and ungetc() equivalents."""
@@ -181,8 +184,10 @@ def _parse_atom(source):
     elif char in _CHAR_LITERALS:
         return char
     elif char == '\\':
-        # TODO(jasonpr): Deal with escape sequences.
-        raise NotImplementedError('Cannot yet handle escape sequences.')
+        escaped = source.get()
+        assert escaped in _IDENTIY_ESCAPES
+        # TODO(jasonpr): Handle non-identity escapes such as \t?
+        return escaped
     else:
         source.put(char)
         return None
