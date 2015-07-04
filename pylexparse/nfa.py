@@ -115,22 +115,37 @@ class Nfa(object):
     def match(self, candidate):
         """Match the candidate against this NFA.
 
-        Return whether the candidate matches.
+        Return matching states.
         """
+        states, length = self.longest_match(candidate)
+        return states if length == len(candidate) else set()
 
+    def longest_match(self, chars):
         states = set(epsilon_closure([self.start]))
 
-        # Determine what states can be reached after consuming each
-        # character.
-        for character in candidate:
-            next_states = set()
-            for state in states:
-                next_states |= state.follow(character)
-            states = next_states
-            states = epsilon_closure(states)
+        match = set(), 0
 
-        # See if any reachable state is an accpeting state.
-        return bool(states & self.accepting)
+        for i, char in enumerate(chars):
+            if not states:
+                break
+            acceptors = states & self.accepting
+            if acceptors:
+                match = acceptors, i
+            states = advance(states, char)
+
+        # Do one more check after the final advance step.
+        acceptors = states & self.accepting
+        if acceptors:
+            match = acceptors, len(chars)
+
+        return match
+
+
+def advance(states, char):
+    next_states = set()
+    for state in states:
+        next_states |= state.follow(char)
+    return epsilon_closure(next_states)
 
 
 def epsilon_closure(states):

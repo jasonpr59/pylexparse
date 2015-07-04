@@ -29,7 +29,7 @@ def _match_regex(regex_pattern, candidate):
     """Print whether a candidate string matches a regex pattern."""
     pattern = regex.parse_regex(regex_pattern)
     nfa = matcher.pattern_to_nfa(pattern)
-    print nfa.match(candidate)
+    print bool(nfa.match(candidate))
 
 
 if __name__ == '__main__':
