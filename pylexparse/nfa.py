@@ -121,6 +121,10 @@ class Nfa(object):
         return states if length == len(candidate) else set()
 
     def longest_match(self, chars):
+        """Find the longest match, starting from the first character.
+
+        Return (matching states, match length) tuple.
+        """
         states = set(epsilon_closure([self.start]))
 
         match = set(), 0
@@ -142,6 +146,8 @@ class Nfa(object):
 
 
 def advance(states, char):
+    """Find all states to which any input state could advance,
+       along the given character."""
     next_states = set()
     for state in states:
         next_states |= state.follow(char)
