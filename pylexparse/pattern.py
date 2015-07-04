@@ -21,6 +21,14 @@ class Star(object):
         return '(%s)*' % self.pattern
 
 
+class Plus(object):
+    def __init__(self, pattern):
+        self.pattern = pattern
+
+    def __repr__(self):
+        return '(%s)+' % self.pattern
+
+
 class Or(object):
     """Exactly one pattern from one or more candidates."""
 

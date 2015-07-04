@@ -88,8 +88,7 @@ def _parse_duplication(source):
     elif duplicator == '*':
         return p.Star(duplicated)
     elif duplicator == '+':
-        # TODO(jasonpr): Implement
-        raise NotImplementedError('Regex "+" cannot yet be handled.')
+        return p.Plus(duplicated)
     elif duplicator == '{':
         min_repeats = _parse_positive_int(source)
         range_continuation = source.get()

@@ -45,6 +45,13 @@ def star_to_fragment(star):
     return nfa.Fragment(pattern_frag.start, pattern_frag.start)
 
 
+@handles(pattern.Plus)
+def plus_to_fragment(plus):
+    pattern_frag = pattern_to_fragment(plus.pattern)
+    pattern_frag.end.add_empty_transition(pattern_frag.start)
+    return pattern_frag
+
+
 @handles(pattern.Or)
 def or_to_fragment(or_pat):
     # TODO(jasonpr): Update fragment intefrace so that the first
