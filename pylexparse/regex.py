@@ -12,6 +12,15 @@ _CHAR_LITERALS = string.ascii_letters + string.digits + '!"#$%&\',-/:;<=>@^_`~ \
 _GROUP_CHARS = string.ascii_letters + string.digits + '!"#$%&\'()*+,./:;<=>?@[^_`{|}~'
 # Characters that represent themselves when escaped with a backslash.
 _IDENTIY_ESCAPES = r'.[\()*+?{|'
+# Characters that represent a character class when escaped with a backslash.
+_CHARACTER_CLASSES = {
+    'd': string.digits,
+    'w': string.ascii_letters + string.digits + '_',
+    'h': string.hexdigits,
+    # TODO(jasonpr): Make an informed decision, rather than blindly
+    # inheritting this definition from Python.
+    's': string.whitespace,
+    }
 
 
 class _CharSource(object):
@@ -185,9 +194,12 @@ def _parse_atom(source):
         return char
     elif char == '\\':
         escaped = source.get()
-        assert escaped in _IDENTIY_ESCAPES
-        # TODO(jasonpr): Handle non-identity escapes such as \t?
-        return escaped
+        if escaped in _IDENTIY_ESCAPES:
+            return escaped
+        elif escaped in _CHARACTER_CLASSES:
+            return p.OneOf(_CHARACTER_CLASSES[escaped])
+        else:
+            raise ValueError('Unexpected escape sequence, \\%s.', escaped)
     else:
         source.put(char)
         return None
