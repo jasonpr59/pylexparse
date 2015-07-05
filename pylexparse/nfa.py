@@ -2,6 +2,8 @@
 
 import collections
 
+import charsource
+
 class State(object):
     """A state of a Nondeterministic Finite Automaton.
 
@@ -117,8 +119,9 @@ class Nfa(object):
 
         Return matching states.
         """
-        states, length = self.longest_match(candidate)
-        return states if length == len(candidate) else set()
+        states, match = self.longest_match(charsource.RewindSource(candidate))
+        return states if match == candidate else set()
+
 
     def longest_match(self, source):
         """Find the longest match, starting from the first character.
@@ -138,11 +141,12 @@ class Nfa(object):
             if acceptors:
                 match = acceptors, i
             states = advance(states, char)
+        length = i + 1
 
         # Do one more check after the final advance step.
         acceptors = states & self.accepting
         if acceptors:
-            match = acceptors, len(chars)
+            match = acceptors, length
 
         matching_states, match_length = match
         matching_string = source.disown_first(match_length)
