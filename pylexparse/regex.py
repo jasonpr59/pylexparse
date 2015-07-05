@@ -22,6 +22,19 @@ _CHARACTER_CLASSES = {
     's': string.whitespace,
     }
 
+_BRACKET_CHARACTER_CLASSES = {
+    'alnum': set(string.ascii_letters + string.digits),
+    'alpha': set(string.ascii_letters),
+    'digit': set(string.digits),
+    'lower': set(string.ascii_lowercase),
+    'print': set(string.printable),
+    'punct': set(string.punctuation),
+    # TODO(jasonpr): Make an informed decision, rather than blindly
+    # inheritting this definition from Python.
+    'space': set(string.whitespace),
+    'upper': set(string.ascii_uppercase),
+    'xdigit': set(string.hexdigits),
+    }
 
 class _CharSource(object):
     """An input source with getc() and ungetc() equivalents."""
@@ -172,12 +185,28 @@ def _parse_group_chars(source):
     This is just a string of characters allowable in a group specification.
     For example, a valid parse is 'aA1.?', since '[aA1.?]' is a valid group.
     """
-    chars = []
-    next_char = source.get()
-    while next_char and next_char in _GROUP_CHARS:
-        chars.append(next_char)
-        next_char = source.get()
-    source.put(next_char)
+    chars = set()
+
+    while True:
+        range_chars = _parse_group_range(source)
+        if range_chars:
+            for char in range_chars:
+                chars.add(char)
+            continue
+
+        char_class = _parse_char_class(source)
+        if char_class:
+            chars |= char_class
+            continue
+
+        char = source.get()
+        if not char:
+            raise ValueError('Unexpected end of stream.')
+        if char not in _GROUP_CHARS:
+            source.put(char)
+            break
+        chars.add(char)
+
     return ''.join(chars)
 
 
@@ -223,3 +252,65 @@ def _parse_positive_int(source):
         next_char = source.get()
     source.put(next_char)
     return int(''.join(digits))
+
+
+def _parse_group_range(source):
+    """Parse a three-character group range expression.
+
+    Return the set of characters represented by the range.
+
+    For example, parsing the expression 'c-e' from the source returns
+    set(['c', 'd', 'e']).
+    """
+    start = source.get()
+    if start not in _GROUP_CHARS:
+        source.put(start)
+        return None
+
+    middle = source.get()
+    if middle != '-':
+        source.put(middle)
+        source.put(start)
+        return None
+
+    end = source.get()
+    if end not in _GROUP_CHARS:
+        source.put(end)
+        source.put(middle)
+        source.put(start)
+        return None
+
+    range_chars = set()
+    for ascii_value in range(ord(start), ord(end) + 1):
+        range_chars.add(chr(ascii_value))
+    return range_chars
+
+
+def _parse_char_class(source):
+    for class_name, class_contents in _BRACKET_CHARACTER_CLASSES.iteritems():
+        if _parse_verbatim(source, '[:%s:]' % class_name):
+            return class_contents
+    return None
+
+
+def _parse_verbatim(source, desired):
+    """Consume a string, verbatim.
+
+    Return whether the desired string was present.
+
+    If the desired string wasn't present, push back all characters consumed
+    during the execution of this function.
+    """
+    consumed = []
+    for char in desired:
+        consumed.append(source.get())
+        if consumed[-1] != char:
+            break
+    else:
+        # We consumed the whole thing!
+        return True
+    # We broke out when the consumed character diverged from the desired string.
+    # Put everything pack before we return.
+    for to_put_back in reversed(consumed):
+        source.put(to_put_back)
+    return False
