@@ -26,12 +26,18 @@ class GetPutSource(object):
         self._put_chars.append(char)
 
 
-class ReadAheadSource(object):
+class RewindSource(object):
     """An input source that remembers what it has given up."""
 
     def __init__(self, iterable):
         self._source = GetPutSource(iterable)
         self._read = collections.deque()
+
+    def __iter__(self):
+        return self
+
+    def next(self):
+        return self.get()
 
     def get(self):
         """Return the next character."""
@@ -39,10 +45,14 @@ class ReadAheadSource(object):
         self._read.append(char)
         return char
 
-    def forget_first(self, num_to_forget):
-        """Forget the least recently read characters, forever."""
-        for _ in num_to_forget:
-            self._read.popleft()
+    def disown_first(self, num_to_forget):
+        """Forget the least recently read characters, forever.
+
+        Returns a string of the forgotten charcters.
+        """
+        disowned = (self._read.popleft() for _ in xrange(num_to_forget))
+        # We use None as an EOF.
+        return ''.join(char for char in disowned if char is not None)
 
     def rewind(self):
         """Put the read characters back in line to be read.
