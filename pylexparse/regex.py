@@ -3,6 +3,7 @@
 import collections
 import string
 
+import charsource
 import pattern as p
 
 # Characters that represent themselves in a regular expression.
@@ -36,33 +37,9 @@ _BRACKET_CHARACTER_CLASSES = {
     'xdigit': set(string.hexdigits),
     }
 
-class _CharSource(object):
-    """An input source with getc() and ungetc() equivalents."""
-    def __init__(self, iteratable):
-        self._iterator = iter(iteratable)
-        self._put_chars = collections.deque()
-
-    def get(self):
-        """Get the next character from the input stream."""
-        if self._put_chars:
-            return self._put_chars.pop()
-        try:
-            return next(self._iterator)
-        except StopIteration:
-            # None is our EOF.
-            return None
-
-    def put(self, char):
-        """Put a character back onto the input stream.
-
-        Characters are put back in LIFO order.
-        """
-        self._put_chars.append(char)
-
-
 def parse_regex(regex_string):
     """Convert a regular expression string into a Pattern."""
-    return _parse_regex(_CharSource(regex_string))
+    return _parse_regex(charsource.GetPutSource(regex_string))
 
 
 # The following _parse_* methods form a recursive descent parser
