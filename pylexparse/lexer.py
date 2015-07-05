@@ -64,3 +64,8 @@ class Lexer(object):
             assert len(match) > 0
             if token.emitted:
                 yield Token(self._acceptor_rules[acceptor].name, match)
+
+    def lex_file(self, open_file):
+        """Break a file into tokens."""
+        for token in self.lex(charsource.chars_in_file(open_file)):
+            yield token
