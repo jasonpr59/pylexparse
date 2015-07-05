@@ -64,8 +64,8 @@ class RewindSource(object):
             self._source.put(self._read.pop())
 
 
-def chars_in_file(file):
+def chars_in_file(open_file):
     """Yield each character in a file."""
-    for line in file:
+    for line in open_file:
         for char in line:
             yield char
