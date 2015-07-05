@@ -1,5 +1,6 @@
 import collections
 
+import charsource
 import matcher
 import nfa
 import regex
@@ -29,7 +30,18 @@ class Lexer(object):
             start.add_empty_transition(fragment.start)
             fragment.end.add_empty_transition(end)
 
+        # Add final EOF transition.
+        # The regex for this rule is never used.
+        # TODO(jasonpr): Allow a token to exist independently of its regex?
+        eof_rule = Rule('EOF', '', emitted=False)
+        eof_acceptor = nfa.State()
+        # None is our EOF.
+        start.add_transition(None, eof_acceptor)
+        self._acceptor_rules[eof_acceptor] = eof_rule
+        eof_acceptor.add_empty_transition(end)
+
         self._nfa = nfa.Nfa(start, self._acceptor_rules.keys())
+        self._eof_rule = eof_rule
 
     def lex(self, input_str):
         """Break an input stream into tokens.
@@ -37,20 +49,18 @@ class Lexer(object):
         Yields tokens from the input stream, for each token whose rule specifies
         emitted=True.
         """
-        token_start = 0
-        while token_start < len(input_str):
-            # TODO(jasonpr): Don't keep slicing the string!
-            acceptors, length = self._nfa.longest_match(input_str[token_start:])
-
-            # All tokens must have nonzero length.
-            assert length > 0
-            token_end = token_start + length
-            token_text = input_str[token_start:token_end]
+        source = charsource.RewindSource(input_str)
+        while True:
+            acceptors, match = self._nfa.longest_match(source)
 
             # TODO(jasonpr): Resolve conflicting token types.
             assert len(acceptors) == 1
             acceptor = acceptors.pop()
             token = self._acceptor_rules[acceptor]
+
+            if token is self._eof_rule:
+                break
+
+            assert len(match) > 0
             if token.emitted:
-                yield Token(self._acceptor_rules[acceptor].name, token_text)
-            token_start = token_end
+                yield Token(self._acceptor_rules[acceptor].name, match)

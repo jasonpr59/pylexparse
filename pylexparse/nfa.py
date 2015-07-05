@@ -120,16 +120,18 @@ class Nfa(object):
         states, length = self.longest_match(candidate)
         return states if length == len(candidate) else set()
 
-    def longest_match(self, chars):
+    def longest_match(self, source):
         """Find the longest match, starting from the first character.
 
-        Return (matching states, match length) tuple.
+        Args:
+            source: A RewindSource of characters.
+        Return (matching states, matching string) tuple.
         """
         states = set(epsilon_closure([self.start]))
 
         match = set(), 0
 
-        for i, char in enumerate(chars):
+        for i, char in enumerate(source):
             if not states:
                 break
             acceptors = states & self.accepting
@@ -142,7 +144,10 @@ class Nfa(object):
         if acceptors:
             match = acceptors, len(chars)
 
-        return match
+        matching_states, match_length = match
+        matching_string = source.disown_first(match_length)
+        source.rewind()
+        return matching_states, matching_string
 
 
 def advance(states, char):
