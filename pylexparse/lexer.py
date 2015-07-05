@@ -4,7 +4,9 @@ import matcher
 import nfa
 import regex
 
-Token = collections.namedtuple('Token', ['type_name', 'value'])
+class Token(collections.namedtuple('Token', ['type_name', 'value'])):
+    def __str__(self):
+        return '%s(%r)' % (self.type_name, self.value)
 
 
 class Rule(object):
