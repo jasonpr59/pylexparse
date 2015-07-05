@@ -9,7 +9,7 @@ import pattern as p
 # TODO(jasonpr): Handle $ and ^ specially at edges of regex.
 _CHAR_LITERALS = string.ascii_letters + string.digits + '!"#$%&\',-/:;<=>@^_`~] \t'
 # Characters that represent themselves inside a square-bracket expression.
-_GROUP_CHARS = string.ascii_letters + string.digits + '!"#$%&\'()*+,./:;<=>?@[^_`{|}~'
+_GROUP_CHARS = string.ascii_letters + string.digits + '!"#$%&\'()*+,-./:;<=>?@[^_`{|}~'
 # Characters that represent themselves when escaped with a backslash.
 _IDENTIY_ESCAPES = r'.[\()*+?{|'
 # Characters that represent a character class when escaped with a backslash.
