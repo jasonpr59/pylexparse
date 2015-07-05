@@ -8,7 +8,7 @@ import pattern as p
 
 # Characters that represent themselves in a regular expression.
 # TODO(jasonpr): Handle $ and ^ specially at edges of regex.
-_CHAR_LITERALS = string.ascii_letters + string.digits + '!"#$%&\',-/:;<=>@^_`~] \t'
+_CHAR_LITERALS = string.ascii_letters + string.digits + '!"#$%&\',-/:;<=>@^_`~] \t\n\r'
 # Characters that represent themselves inside a square-bracket expression.
 _GROUP_CHARS = string.ascii_letters + string.digits + '!"#$%&\'()*+,-./:;<=>?@[^_`{|}~'
 # Characters that represent themselves when escaped with a backslash.
