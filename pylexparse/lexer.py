@@ -22,11 +22,15 @@ class Lexer(object):
     """A lexer for a list of token rules."""
     def __init__(self, rules):
         self._acceptor_rules = {}
+        self._acceptor_precedences = {}
         start, end = nfa.State(), nfa.State()
-        for rule in rules:
+        for i, rule in enumerate(rules):
             fragment = matcher.pattern_to_fragment(regex.parse_regex(rule.regex))
             acceptor = fragment.end
             self._acceptor_rules[acceptor] = rule
+            # Later rules get higher precedence.  This mimics
+            # reassignment in most languages: `x=1; x=2;` means `x==2`.
+            self._acceptor_precedences[acceptor] = i
             start.add_empty_transition(fragment.start)
             fragment.end.add_empty_transition(end)
 
@@ -38,6 +42,11 @@ class Lexer(object):
         # None is our EOF.
         start.add_transition(None, eof_acceptor)
         self._acceptor_rules[eof_acceptor] = eof_rule
+        # The EOF's precedence shouldn't matter, as it should never
+        # conflict with anything.  If something *does* conflict with
+        # EOF, we'd want to know about it.  So, EOF has the lowest
+        # precedence.
+        self._acceptor_precedences[eof_acceptor] = -1
         eof_acceptor.add_empty_transition(end)
 
         self._nfa = nfa.Nfa(start, self._acceptor_rules.keys())
@@ -53,9 +62,9 @@ class Lexer(object):
         while True:
             acceptors, match = self._nfa.longest_match(source)
 
-            # TODO(jasonpr): Resolve conflicting token types.
-            assert len(acceptors) == 1
-            acceptor = acceptors.pop()
+            # If there are multiple possibilities, choose the one with
+            # highest precedence.
+            acceptor = max(acceptors, key=lambda acc: self._acceptor_precedences[acc])
             token = self._acceptor_rules[acceptor]
 
             if token is self._eof_rule:
