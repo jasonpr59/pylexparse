@@ -26,7 +26,15 @@ def as_dot(graph):
     # The registrar provides small, unique numbers as node names.
     registrar = Registrar()
 
+    print >>output, 'invisible_start_source [style="invisible"]'
+    print >>output, 'invisible_start_source -> %d[shape="none", style="bold"]' % (
+        registrar.get_id(graph.start))
+
     for node in graphutil.reachable(graph.start):
+        print >>output, '%d [shape="%s"]' % (
+            registrar.get_id(node),
+            'doublecircle' if node in graph.accepting_states else 'circle',
+            )
         for edge_name, successor in node:
             print >>output, '%d -> %d [label="%s"]' % (
                 registrar.get_id(node),
