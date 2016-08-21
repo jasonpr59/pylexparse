@@ -1,7 +1,6 @@
 import collections
 
 import charsource
-import matcher
 import nfa
 import regex
 
@@ -25,7 +24,7 @@ class Lexer(object):
         self._acceptor_precedences = {}
         start, end = nfa.State(), nfa.State()
         for i, rule in enumerate(rules):
-            fragment = matcher.pattern_to_fragment(regex.parse_regex(rule.regex))
+            fragment = regex.parse_regex(rule.regex)._fragment()
             acceptor = fragment.end
             self._acceptor_rules[acceptor] = rule
             # Later rules get higher precedence.  This mimics

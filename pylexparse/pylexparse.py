@@ -4,7 +4,6 @@
 import sys
 
 import graph_printer
-import matcher
 import regex
 
 
@@ -21,15 +20,14 @@ def main(args):
 def _regex_to_nfa_dot(regex_pattern):
     """Print a DOT graph representing a regular expression."""
     pattern = regex.parse_regex(regex_pattern)
-    nfa = matcher.pattern_to_nfa(pattern)
+    nfa = pattern.compiled()
     print graph_printer.as_dot(nfa)
 
 
 def _match_regex(regex_pattern, candidate):
     """Print whether a candidate string matches a regex pattern."""
     pattern = regex.parse_regex(regex_pattern)
-    nfa = matcher.pattern_to_nfa(pattern)
-    print bool(nfa.match(candidate))
+    print pattern.match(candidate)
 
 
 if __name__ == '__main__':

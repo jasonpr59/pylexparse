@@ -1,14 +1,10 @@
 """Unit tests for regex."""
 import unittest
 
-import matcher
-import nfa
 import regex
 
 def match(regex_string, candidate):
-    pattern = regex.parse_regex(regex_string)
-    nfa = matcher.pattern_to_nfa(pattern)
-    return bool(nfa.match(candidate))
+    return regex.parse_regex(regex_string).match(candidate)
 
 class TestRegex(unittest.TestCase):
     def test_smoke(self):

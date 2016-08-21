@@ -203,11 +203,11 @@ def _parse_atom(source):
     elif char == '.':
         return p.Anything()
     elif char in _CHAR_LITERALS:
-        return char
+        return p.String(char)
     elif char == '\\':
         escaped = source.get()
         if escaped in _IDENTIY_ESCAPES:
-            return escaped
+            return p.String(escaped)
         elif escaped in _CHARACTER_CLASSES:
             return p.Selection(_CHARACTER_CLASSES[escaped])
         else:
