@@ -1,0 +1,3 @@
+[submodule "pylexparse/fixed_point"]
+	path = pylexparse/fixed_point
+	url = git@github.com:jasonpr59/fixed_point.git
