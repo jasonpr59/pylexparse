@@ -17,7 +17,7 @@ def nfa_to_dfa(nfa):
     # Discover all dfa_states, worklist-style.
     worklist = collections.deque()
     done = set()
-    start_nss = NfaStateSet(nfas.epsilon_closure([nfa.start]))
+    start_nss = NfaStateSet(nfas.epsilon_closure(nfa.start))
     worklist.append(start_nss)
 
     while worklist:
@@ -35,7 +35,7 @@ def nfa_to_dfa(nfa):
                 dfa_transitions[char].add(nfa_dest)
 
         for char, next_states in dfa_transitions.iteritems():
-            next_set = NfaStateSet(nfas.epsilon_closure(next_states))
+            next_set = NfaStateSet(nfas.multi_epsilon_closure(next_states))
             worklist.append(next_set)
             dfa_states[focus].add_transition(char, dfa_states[next_set])
     

@@ -3,6 +3,7 @@
 import collections
 
 import charsource
+from fixed_point import fixed_point
 
 class State(object):
     """A state of a Nondeterministic Finite Automaton.
@@ -130,7 +131,7 @@ class Nfa(object):
             source: A RewindSource of characters.
         Return (matching states, matching string) tuple.
         """
-        states = set(epsilon_closure([self.start]))
+        states = set(epsilon_closure(self.start))
 
         match = set(), 0
 
@@ -160,20 +161,26 @@ def advance(states, char):
     next_states = set()
     for state in states:
         next_states |= state.follow(char)
-    return epsilon_closure(next_states)
+    return multi_epsilon_closure(next_states)
 
 
-def epsilon_closure(states):
-    agenda = collections.deque(states)
-    closure = set()
+@fixed_point(set)
+def epsilon_closure(state, _epsilon_closure):
+    """Find all states that can be reached by following empty transitions.
 
-    while agenda:
-        state = agenda.pop()
-        if state in closure:
-            # We've already visited it!
-            continue
-        closure.add(state)
+    In contrast with the usual description of the epsilon closure,
+    this function takes a single state as its input.  Our
+    multi_epsilon_closure takes a set of states, and returns the union
+    of their epsilon clousres.
+    """
+    result = set([state])
+    for follower in state.follow(''):
+        result |= _epsilon_closure(follower)
+    return result
 
-        agenda.extend(state.follow(''))
-
-    return closure
+def multi_epsilon_closure(states):
+    """Find the epsilon closure of several states and return their union."""
+    result = set()
+    for state in states:
+        result |= epsilon_closure(state)
+    return result
